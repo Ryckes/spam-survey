@@ -1,1 +1,3 @@
 *.pyc
+corpora
+processed_corpora
