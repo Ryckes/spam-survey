@@ -4,34 +4,52 @@ import cPickle as pickle
 from common_corpus import CommonCorpus
 from progress_display import ProgressDisplay
 
-def generateDictionaries(corpus, maildir, numWords):
+def generateDictionaries(corpus, maildir, numTerms, ngramSize = 1):
     histogram = {}
     files = corpus.getFilesList(maildir)
     progress = ProgressDisplay(len(files), 'Reading data')
+    if ngramSize > 1:
+        nextTerm = ['$']
+    else:
+        nextTerm = []
+
     for filepath in files:
         with open(filepath, 'r') as fileHandler:
-            mail = corpus.processMail(fileHandler.read())
+            # We know that both first two parameters are unused in
+            # this corpus:
+            mail = corpus.processMail(None, None, fileHandler.read())
             for token in mail['body']:
+                nextTerm.append(token)
+                if len(nextTerm) == ngramSize:
+                    if ngramSize > 1:
+                        term = tuple(nextTerm)
+                    else:
+                        term = nextTerm[0]
+                    nextTerm = nextTerm[1:]
+                else:
+                    continue
+
                 try:
-                    histogram[token] += 1
+                    histogram[term] += 1
                 except KeyError:
-                    histogram[token] = 1
+                    histogram[term] = 1
         progress.update()
 
-    words = histogram.keys()
+    terms = histogram.keys()
     # Descending order
-    words.sort(key = lambda x: histogram[x], reverse = True)
-    dictionary = dict(zip(range(numWords), words))
-    inverseDictionary = dict(zip(words, range(numWords)))
+    terms.sort(key = lambda x: histogram[x], reverse = True)
+    dictionary = dict(zip(range(numTerms), terms))
+    inverseDictionary = dict(zip(terms, range(numTerms)))
 
     return dictionary, inverseDictionary
 
 def main():
     corpus = CommonCorpus()
-    maildir = './processed_corpora/TREC2007'
-    dictOutputFile = './processed_corpora/TREC2007_dict'
-    numWords = 1000
-    dictionary, inverseDictionary = generateDictionaries(corpus, maildir, numWords)
+    maildir = './processed_corpora/TREC2007_reduced1000'
+    dictOutputFile = '%s_dict_2gram' % maildir
+    numTerms = 1000
+    ngramSize = 2
+    dictionary, inverseDictionary = generateDictionaries(corpus, maildir, numTerms, ngramSize)
 
     with open(dictOutputFile, 'w') as fileHandler:
         pickle.dump(dictionary, fileHandler)
