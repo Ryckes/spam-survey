@@ -1,7 +1,7 @@
 
 class MailCorpus:
-    def getFilesList(directory):
+    def getFilesList(self, directory):
         pass
 
-    def processMail(text):
+    def processMail(self, directory, filename, text):
         pass

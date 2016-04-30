@@ -10,5 +10,5 @@ class CommonCorpus(MailCorpus):
         numMails = len(listdir(directory))
         return [join(directory, '%d' % i) for i in xrange(1, numMails + 1)]
 
-    def processMail(self, text):
+    def processMail(self, directory, filename, text):
         return pickle.loads(text)

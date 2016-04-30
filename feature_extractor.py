@@ -88,8 +88,11 @@ class FeatureExtractor:
     def process(self, mail):
         """
         mail: must be a dictionary with entries for 'headers',
-        'subject', and 'body'. Subclasses of MailCorpus provide this
-        kind of dictionaries. All three elements are strings.
+        'subject', 'body' and 'label'. Subclasses of MailCorpus
+        provide this kind of dictionaries. All three first elements are
+        strings. label is 1 for spam, 0 for ham.
+
+        label is deliberately unused.
         """
 
         downloadNLTKIfNecessary()

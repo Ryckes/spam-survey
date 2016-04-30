@@ -7,10 +7,10 @@ from mail_storage import MailStorage
 from feature_extractor import FeatureExtractor
 from progress_display import ProgressDisplay
 
-def processMail(filename, corpus):
+def processMail(directory, filename, corpus):
     with open(filename, 'r') as fileHandler:
         fullText = fileHandler.read()
-        return corpus.processMail(fullText)
+        return corpus.processMail(directory, filename, fullText)
 
 def processDir(corpusName, mailCorpus, maildir):
     mailIterator = mailCorpus.getFilesIterator(maildir)
@@ -21,7 +21,7 @@ def processDir(corpusName, mailCorpus, maildir):
     # Output files are named 1 to numMails
     index = 1
     for mail in mailIterator:
-        processed = processMail(mail, mailCorpus)
+        processed = processMail(maildir, mail, mailCorpus)
         features = featureExtractor.process(processed)
         mailStorage.store(features, str(index))
 
@@ -29,7 +29,9 @@ def processDir(corpusName, mailCorpus, maildir):
         progress.update()
 
 def main():
-    processDir('TREC2007', TRECCorpus(), './corpora/trec07p/data')
+    processDir('TREC2007_reduced1000',
+               TRECCorpus(),
+               './corpora/trec07p_reduced1000')
 
 if __name__ == '__main__':
     main()
