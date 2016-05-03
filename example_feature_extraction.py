@@ -13,7 +13,7 @@ def processMail(directory, filename, corpus):
         return corpus.processMail(directory, filename, fullText)
 
 def processDir(corpusName, mailCorpus, maildir):
-    mailIterator = mailCorpus.getFilesIterator(maildir)
+    mailIterator = mailCorpus.getFilesList(maildir)
     mailStorage = MailStorage(corpusName)
     featureExtractor = FeatureExtractor()
     progress = ProgressDisplay(len(mailIterator), 'Processing emails')
@@ -29,9 +29,9 @@ def processDir(corpusName, mailCorpus, maildir):
         progress.update()
 
 def main():
-    processDir('TREC2007_reduced1000',
+    processDir('TREC2007_untokenized',
                TRECCorpus(),
-               './corpora/trec07p_reduced1000')
+               './corpora/trec07p')
 
 if __name__ == '__main__':
     main()

@@ -9,7 +9,7 @@ class TRECCorpus(MailCorpus):
     def __init__(self):
         self.labels = None
 
-    def getFilesIterator(self, directory):
+    def getFilesList(self, directory):
         directory = join(directory, 'data')
         numMails = len(listdir(directory))
         return [join(directory, 'inmail.%d' % i) for i in xrange(1, numMails + 1)]

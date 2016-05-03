@@ -100,27 +100,27 @@ class FeatureExtractor:
 
         featureDict = copy(mail)
 
-        featureDict['headers'] = self.tokenize(featureDict['headers'])
-        featureDict['subject'] = self.tokenize(featureDict['subject'])
-        featureDict['body'] = self.tokenize(featureDict['body'])
+        tokenizedHeaders = self.tokenize(featureDict['headers'])
+        tokenizedSubject = self.tokenize(featureDict['subject'])
+        tokenizedBody = self.tokenize(featureDict['body'])
 
         # The following feature extraction procedure is rather
         # inefficient, but since we cannot improve its asymptotic
         # complexity, it may be worth the tradeoff for readability.
-        featureDict['averageWordLength'] = self.getAverageWordLength(featureDict['body'])
-        featureDict['ratioAlphaOverTextLength'] = self.getRatioAlphaOverTextLength(featureDict['body'])
+        featureDict['averageWordLength'] = self.getAverageWordLength(tokenizedBody)
+        featureDict['ratioAlphaOverTextLength'] = self.getRatioAlphaOverTextLength(tokenizedBody)
 
-        sentences = self.getSentences(featureDict['body'])
+        sentences = self.getSentences(tokenizedBody)
 
         featureDict['numSentences'] = len(sentences)
-        numPunctuationChars = self.getNumPunctuationCharacters(featureDict['body'])
+        numPunctuationChars = self.getNumPunctuationCharacters(tokenizedBody)
         try:
-            featureDict['averageSentenceLength'] = len(featureDict['body']) / float(featureDict['numSentences'])
+            featureDict['averageSentenceLength'] = len(tokenizedBody) / float(featureDict['numSentences'])
             featureDict['ratioPunctuationCharactersOverNumSentences'] = numPunctuationChars / float(featureDict['numSentences'])
         except ZeroDivisionError:
             featureDict['averageSentenceLength'] = 0
             featureDict['ratioPunctuationCharactersOverNumSentences'] = 0
 
-        featureDict['YuleK'] = self.getYuleKMeasure(featureDict['body'])
+        featureDict['YuleK'] = self.getYuleKMeasure(tokenizedBody)
 
         return featureDict
