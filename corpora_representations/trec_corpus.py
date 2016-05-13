@@ -2,7 +2,7 @@
 from os import listdir
 from os.path import isfile, join
 
-from mail_corpus import MailCorpus
+from corpora_representations.mail_corpus import MailCorpus
 
 class TRECCorpus(MailCorpus):
 

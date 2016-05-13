@@ -3,7 +3,7 @@ import cPickle as pickle
 from os import listdir
 from os.path import join
 
-from mail_corpus import MailCorpus
+from corpora_representations.mail_corpus import MailCorpus
 
 class CommonCorpus(MailCorpus):
     def getFilesList(self, directory):
