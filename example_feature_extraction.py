@@ -2,7 +2,7 @@
 import time
 import os
 
-from trec_corpus import TRECCorpus
+from corpora_representations.trec_corpus import TRECCorpus
 from mail_storage import MailStorage
 from feature_extractor import FeatureExtractor
 from progress_display import ProgressDisplay
