@@ -6,7 +6,7 @@ from data_iterator import DataIterator
 
 
 
-class ExperimentRunner:
+class ExperimentRunner(object):
 
     DEFAULT_COLUMN_WIDTH = 50
 
@@ -74,18 +74,20 @@ class ExperimentRunner:
         print ' '.join(['%' + str(self.column_width) + 's'] * len(self.classifiers)) % \
             tuple(map(operator.itemgetter(1), self.classifiers))
 
-    def print_score(self, classifiers, (X, y)):
-        predictions = [classifier.predict(X)
-                       for classifier, _ in
-                       classifiers]
-        measures = [self.getMeasures(prediction, y)
-                    for prediction in predictions]
+    def print_score(self, measures = None):
         measureStrings = self.getMeasureStrings(measures)
-        print ' '.join(['%' + str(self.column_width) + 's'] * len(classifiers)) % \
+        print ' '.join(['%' + str(self.column_width) + 's'] * len(self.classifiers)) % \
             tuple(measureStrings)
 
+    def mustStop(self, measures):
+        # To be overriden
+        return False
+
+    def finishExperiment(self, test_data):
+        # To be overriden
+        pass
+
     def run(self):
-        self.print_heading()
         dataIterator = DataIterator(self.obtain_data_generator,
                                     self.batch_size, self.test_size,
                                     self.additional_features,
@@ -101,6 +103,16 @@ class ExperimentRunner:
             # X has shape (samples, n_features)
             X, y = dataIterator.next()
 
+            # Training:
             for classifier, _ in self.classifiers:
                 classifier.partial_fit(X, y, self.classes)
-            self.print_score(self.classifiers, test_data)
+
+            predictions = [classifier.predict(test_data[0])
+                           for classifier, _ in
+                           self.classifiers]
+            measures = [self.getMeasures(prediction, test_data[1])
+                        for prediction in predictions]
+
+            if self.mustStop(measures):
+                break
+        self.finishExperiment(test_data)
