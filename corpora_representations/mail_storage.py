@@ -1,12 +1,17 @@
 
+import os
 import cPickle as pickle
 
-class MailStorage:
+class MailStorage(object):
 
     def __init__(self, corpusName):
         self.corpusName = corpusName
 
     def store(self, mailData, name):
-        with open('./processed_corpora/%s/%s' %
-                  (self.corpusName, name), 'w') as fileHandler:
+        dirname = os.path.join('./processed_corpora', self.corpusName)
+        if not os.path.exists(dirname):
+            os.mkdir(dirname)
+            print '%s created.' % dirname
+
+        with open(os.path.join(dirname, name), 'w') as fileHandler:
             pickle.dump(mailData, fileHandler)

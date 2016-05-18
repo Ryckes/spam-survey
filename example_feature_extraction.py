@@ -3,7 +3,8 @@ import time
 import os
 
 from corpora_representations.trec_corpus import TRECCorpus
-from mail_storage import MailStorage
+from corpora_representations.ling_corpus import LingCorpus
+from corpora_representations.mail_storage import MailStorage
 from feature_extractor import FeatureExtractor
 from progress_display import ProgressDisplay
 
@@ -29,9 +30,9 @@ def processDir(corpusName, mailCorpus, maildir):
         progress.update()
 
 def main():
-    processDir('TREC2007_untokenized',
-               TRECCorpus(),
-               './corpora/trec07p')
+    processDir('LingSpam_untokenized',
+               LingCorpus(),
+               './corpora/lingspam_public')
 
 if __name__ == '__main__':
     main()
