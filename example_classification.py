@@ -1,7 +1,5 @@
 
 import os
-import sys
-import numpy
 
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.linear_model import SGDClassifier
