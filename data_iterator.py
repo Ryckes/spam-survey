@@ -19,6 +19,9 @@ class DataIterator:
 
         self.resetMailsGenerator()
 
+        # Note: this normalization is done over the data generator. If
+        # different generators or corpora are used for
+        # training/validation/testing the normalization won't be sound.
         if normalize_additional:
             self.additional_features_maxima = self._find_features_maxima(obtain_data_generator(), self.additional_features)
         else:
