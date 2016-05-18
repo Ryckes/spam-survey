@@ -15,12 +15,15 @@ def dumpExperiment():
     try:
         with open(resultsPath, 'r') as fileHandler:
             results = cPickle.load(fileHandler)
-        for key, val in results.items():
-            print "%s: %f" % (key, val)
     except:
         print 'Error trying to open %s' % resultsPath
         sys.exit(1)
 
+    for classifierResults in results:
+        for key, val in classifierResults.items():
+            if key != 'classifier':
+                print "%s: %s" % (key, val)
+        print
+
 if __name__ == '__main__':
     dumpExperiment()
-

@@ -16,6 +16,9 @@ def getRecall(predictions, labels):
 def getAccuracy(predictions, labels):
     return numpy.sum(numpy.equal(labels, predictions)) / float(len(labels))
 
+def getMeasureAverage(*measures):
+    return lambda predictions, labels: sum([measure(predictions, labels) for measure in measures]) / float(len(measures))
+
 def copyClassifierParameters(classifier):
     param = {}
     if hasattr(classifier, 'coef_'):

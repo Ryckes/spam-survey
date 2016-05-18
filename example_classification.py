@@ -1,7 +1,6 @@
 
 import os
 import sys
-import cPickle as pickle
 import numpy
 
 from sklearn.feature_extraction.text import HashingVectorizer
@@ -13,10 +12,11 @@ from sklearn.neural_network import MLPClassifier
 
 import util
 from corpora_representations.common_corpus import CommonCorpus
-from experiment_runner import ExperimentRunner
+from spam_experiment_runner import SpamExperimentRunner
+from data_iterator import DataIterator
 
 corpus = CommonCorpus()
-directory = './processed_corpora/TREC2007_untokenized'
+directory = './processed_corpora/LingSpam_untokenized'
 obtain_data_generator = (lambda corpus, directory:
                          lambda: corpus.getMails(directory))(corpus, directory)
 random_seed = 1
@@ -33,95 +33,44 @@ additional_features = ['numSentences', 'averageWordLength',
                        'ratioPunctuationCharactersOverNumSentences',
                        'YuleK']
 # additional_features = []
-additional_features_max = [0] * len(additional_features)
 
 n_features = len(additional_features) + vocabulary_size
-batch_size = 500
-test_size = 1423
+batch_size = 200
+test_size = 400
 
 classifiers = [SGDClassifier(random_state = random_seed,
-                             class_weight = { 0: 1, 1: 1 })]
-classifierNames = ['SGDClassifier_1']
+                             class_weight = { 0: 1, 1: 1 }),
+               SGDClassifier(random_state = random_seed,
+                             class_weight = { 0: 1.1, 1: 1 }),
+               SGDClassifier(random_state = random_seed,
+                             class_weight = { 0: 1.2, 1: 1 }),
+               SGDClassifier(random_state = random_seed,
+                             class_weight = { 0: 1.3, 1: 1 })]
+classifierNames = ['SGDClassifier_1', 'SGDClassifier_1.1',
+                   'SGDClassifier_1.2', 'SGDClassifier_1.3']
 experimentsFolder = 'experiments'
-outputDir = os.path.join(experimentsFolder, classifierNames[0])
-if not os.path.exists(experimentsFolder):
-    os.mkdir(experimentsFolder)
-
-if os.path.exists(outputDir):
-    print """Directory %s already exists. Please, delete it or change the
-classifier name.""" % outputDir
-    sys.exit(1)
-
-measures = [lambda *args:
-            (util.getSpecificity(*args) + util.getAccuracy(*args)) / 2]
-measureNames = ['Accuracy and specificity average']
+outputDir = os.path.join(experimentsFolder, 'Four_classifiers')
 
 classes = [0, 1]
 
-class SpamExperimentRunner(ExperimentRunner):
-    def __init__(self, classifiers, measures,
-                 obtain_data_generator,
-                 additional_features,
-                 batch_size, test_size,
-                 classes, vectorizer,
-                 normalize_additional = True):
-        super(SpamExperimentRunner, self).__init__(classifiers,
-                                                   measures,
-                                                   obtain_data_generator,
-                                                   additional_features,
-                                                   batch_size, test_size,
-                                                   classes, vectorizer,
-                                                   normalize_additional)
+training_data_iterator = DataIterator(obtain_data_generator,
+                                      batch_size, test_size,
+                                      additional_features, vectorizer)
+test_data = DataIterator(obtain_data_generator, test_size, 0,
+                         additional_features, vectorizer).next()
+validation_data = test_data
 
-        self.bestModelSoFar = None
-        self.bestMeasureSoFar = -1
-        self.iterationsWithoutImprovement = 0
-        self.maxIterationsWithoutImprovement = 10
-        self.print_heading()
-
-    def mustStop(self, measures):
-        self.print_score(measures)
-        measure = measures[0][0]
-        if measure > self.bestMeasureSoFar:
-            self.bestMeasureSoFar = measure
-            self.bestModelSoFar = util.copyClassifierParameters(self.classifiers[0][0])
-            self.iterationsWithoutImprovement = 0
-        else:
-            self.iterationsWithoutImprovement += 1
-            if self.iterationsWithoutImprovement == \
-               self.maxIterationsWithoutImprovement:
-                return True
-
-        return False
-
-    def finishExperiment(self, test_data):
-        # Store classifiers and results, return best model, etc.
-        # Revert to best classifier
-
-        classifier = self.classifiers[0][0]
-        util.insertClassifierParameters(classifier, self.bestModelSoFar)
-
-        predictions = classifier.predict(test_data[0])
-        labels = test_data[1]
-        result = [util.getSpecificity(predictions, labels),
-                  util.getRecall(predictions, labels),
-                  util.getAccuracy(predictions, labels)]
-
-        resultLegend = ['Specificity', 'Recall', 'Accuracy']
-
-        os.mkdir(outputDir)
-
-        with open(outputDir + 'results', 'w') as fileHandler:
-            pickle.dump(dict(zip(resultLegend, result)), fileHandler)
-
-        with open(outputDir + 'model', 'w') as fileHandler:
-            pickle.dump(self.classifiers[0][0], fileHandler)
+test_measures = [(util.getSpecificity, 'Specificity'),
+                 (util.getRecall, 'Recall'),
+                 (util.getAccuracy, 'Accuracy')]
+validation_measure = (util.getMeasureAverage(util.getSpecificity,
+                                             util.getAccuracy),
+                      'Accuracy and specificity average')
 
 runner = SpamExperimentRunner(zip(classifiers, classifierNames),
-                              zip(measures, measureNames),
-                              obtain_data_generator,
-                              additional_features,
-                              batch_size, test_size,
-                              classes, vectorizer)
+                              training_data_iterator, classes,
+                              vectorizer, outputDir, test_data,
+                              test_measures, validation_data,
+                              validation_measure)
 
 runner.run()
