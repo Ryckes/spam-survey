@@ -7,8 +7,8 @@ from corpora_representations.mail_corpus import MailCorpus
 
 class LingCorpus(MailCorpus):
 
-    def getFilesList(self, directory):
-        directory = join(directory, 'bare')
+    def getFilesList(self, ):
+        directory = join(self.directory, 'bare')
         directories = [join(directory, 'part%d' % i) for i in xrange(1, 11)]
 
         def filesInDirectory(directory):
@@ -19,7 +19,7 @@ class LingCorpus(MailCorpus):
         return list(itertools.chain.from_iterable([filesInDirectory(directory) for
                                        directory in directories]))
 
-    def processMail(self, directory, filename, fullText):
+    def processMail(self, filename, fullText):
         subjectBodyDivider = fullText.find("\n\n")
 
         output = {}

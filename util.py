@@ -36,3 +36,24 @@ def copyClassifierParameters(classifier):
 def insertClassifierParameters(classifier, parameters):
     for key, val in parameters.items():
         classifier.__dict__[key] = val
+
+def getFeaturesMaxima(mails, features):
+    def max_generator_of_lists(gen):
+        prev_max = gen.next()
+        try:
+            # Exhaust iterator
+            while True:
+                el = gen.next()
+                prev_max = [max(prev_max_el, current_el) for
+                            prev_max_el, current_el in
+                            zip(prev_max, el)]
+
+        except StopIteration:
+            pass
+
+        return prev_max
+
+    features_generator = ([mail[feature]
+                           for feature in features]
+                          for mail in mails)
+    return max_generator_of_lists(features_generator)
